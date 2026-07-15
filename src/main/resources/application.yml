@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: android-shop-api
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/android_shop}
+    username: ${DB_USERNAME:android_shop_user}
+    password: ${DB_PASSWORD:android_shop_password}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    open-in-view: false
+
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+
+  mail:
+    from: ${MAIL_FROM:${MAIL_USERNAME}}

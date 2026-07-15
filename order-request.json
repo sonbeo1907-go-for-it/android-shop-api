@@ -1,0 +1,15 @@
+{
+  "receiverName": "Nguyễn Văn A",
+  "phoneNumber": "090 123 4567",
+  "email": "nguyenvana@example.com",
+  "address": "123 Nguyễn Trãi, Thanh Xuân, Hà Nội",
+  "note": "Giao hàng giờ hành chính",
+  "paymentMethod": "COD",
+  "items": [
+    {
+      "phoneId": 1,
+      "optionIds": [1, 4, 6],
+      "quantity": 1
+    }
+  ]
+}
