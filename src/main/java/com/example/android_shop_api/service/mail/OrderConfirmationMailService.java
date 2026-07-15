@@ -10,6 +10,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -17,6 +18,11 @@ import java.util.Locale;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(
+        prefix = "app.mail",
+        name = "enabled",
+        havingValue = "true"
+)
 public class OrderConfirmationMailService {
 
     private final JavaMailSender mailSender;
