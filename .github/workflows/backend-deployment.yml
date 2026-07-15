@@ -110,23 +110,40 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy:
-    name: Deploy to Koyeb
-    needs: docker
-
-    if: ${{ vars.KOYEB_SERVICE_READY == 'true' }}
+    name: Deploy to Render
+    needs:
+      - docker
 
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Configure Koyeb CLI
-        uses: koyeb-community/koyeb-actions@v2
-        with:
-          api_token: ${{ secrets.KOYEB_API_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: read
 
-      - name: Deploy immutable image
+    steps:
+      - name: Trigger immutable Render deployment
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          IMAGE_URL: ghcr.io/sonbeo1907-go-for-it/android-shop-api:${{ github.sha }}
         run: |
-          koyeb service update android-shop-api/api \
-            --docker "${REGISTRY}/${IMAGE_NAME}:${GITHUB_SHA}" \
-            --wait \
-            --wait-timeout 10m
+          set -euo pipefail
+
+          ENCODED_IMAGE_URL="$(
+            python3 -c \
+              'import os, urllib.parse; print(urllib.parse.quote(os.environ["IMAGE_URL"], safe=""))'
+          )"
+
+          if [[ "$RENDER_DEPLOY_HOOK_URL" == *"?"* ]]; then
+            SEPARATOR="&"
+          else
+            SEPARATOR="?"
+          fi
+
+          curl \
+            --fail \
+            --show-error \
+            --silent \
+            --request POST \
+            "${RENDER_DEPLOY_HOOK_URL}${SEPARATOR}imgURL=${ENCODED_IMAGE_URL}"
+
+          echo
+          echo "Render deployment triggered for ${IMAGE_URL}"
