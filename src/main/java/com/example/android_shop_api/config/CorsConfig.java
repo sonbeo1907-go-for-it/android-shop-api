@@ -1,37 +1,41 @@
 package com.example.android_shop_api.config;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
-public class CorsConfig {
+public class CorsConfig implements WebMvcConfigurer {
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource(
+    private final String[] allowedOrigins;
+
+    public CorsConfig(
             @Value("${app.cors.allowed-origins}")
             String allowedOrigins
     ) {
-        List<String> origins = Arrays.stream(
-                        allowedOrigins.split(",")
-                )
+        this.allowedOrigins = Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
                 .filter(origin -> !origin.isBlank())
-                .toList();
+                .toArray(String[]::new);
+    }
 
-        CorsConfiguration configuration =
-                new CorsConfiguration();
+    @PostConstruct
+    void logAllowedOrigins() {
+        System.out.println(
+                "CORS allowed origins: "
+                        + Arrays.toString(allowedOrigins)
+        );
+    }
 
-        configuration.setAllowedOrigins(origins);
-
-        configuration.setAllowedMethods(
-                List.of(
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOrigins(allowedOrigins)
+                .allowedMethods(
                         "GET",
                         "POST",
                         "PUT",
@@ -39,31 +43,8 @@ public class CorsConfig {
                         "DELETE",
                         "OPTIONS"
                 )
-        );
-
-        configuration.setAllowedHeaders(
-                List.of("*")
-        );
-
-        configuration.setExposedHeaders(
-                List.of(
-                        "Location"
-                )
-        );
-
-        // Project dùng Bearer token, không dùng cookie.
-        configuration.setAllowCredentials(false);
-
-        configuration.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration(
-                "/**",
-                configuration
-        );
-
-        return source;
+                .allowedHeaders("*")
+                .allowCredentials(false)
+                .maxAge(3600);
     }
 }
